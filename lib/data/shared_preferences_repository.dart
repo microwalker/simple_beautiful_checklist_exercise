@@ -9,13 +9,13 @@ class SharedPreferencesRepository implements DatabaseRepository {
   @override
   Future<int> getItemCount() async {
     // await Future.delayed(const Duration(milliseconds: 100));
-    return prefs.getStringList(key).then((value) => (value ?? []).length);
+    return (await prefs.getStringList(key) ?? []).length;
   }
 
   @override
   Future<List<String>> getItems() async {
     // await Future.delayed(const Duration(milliseconds: 100));
-    return prefs.getStringList(key).then((value) => value ?? []);
+    return (await prefs.getStringList(key) ?? []); 
   }
 
   @override
