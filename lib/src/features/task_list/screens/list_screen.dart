@@ -16,7 +16,7 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
-  final List<String> _items = [];
+  List<String> items = [];  // Liste wird ständig geändert, final machte nicht wirlich Sinn !!
   bool isLoading = true;
   final TextEditingController _controller = TextEditingController();
 
@@ -27,10 +27,15 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   void _updateList() async {
-    _items.clear();
-    _items.addAll(await widget.repository.getItems());
-    isLoading = false;
-    setState(() {});
+    setState(() => isLoading = true ); // <- wurde komplett vergessen, nach dem 1. laden war isLoading IMMER false!
+
+    // items.addAll(await widget.repository.getItems()); // .whenComplete(() => setState(() => isLoading = false )));
+    widget.repository.getItems().then((value) {
+      items = value;   // Liste erst nach erfolgreichem Auslesen der Werte wieder befüllen !!!
+      setState(() => isLoading = false ); // ...und dann macht das Zurücksetzen der Statusvariable auch Sinn :-)
+    });
+    // isLoading = false;
+    // setState(() {});
   }
 
   @override
@@ -44,11 +49,11 @@ class _ListScreenState extends State<ListScreen> {
           : Column(
               children: [
                 Expanded(
-                  child: _items.isEmpty
+                  child: items.isEmpty
                       ? const EmptyContent()
                       : ItemList(
                           repository: widget.repository,
-                          items: _items,
+                          items: items,
                           updateOnChange: _updateList,
                         ),
                 ),
@@ -60,18 +65,18 @@ class _ListScreenState extends State<ListScreen> {
                       labelText: 'Task Hinzufügen',
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.add),
-                        onPressed: () {
+                        onPressed: () async {
                           if (_controller.text.isNotEmpty) {
-                            widget.repository.addItem(_controller.text);
+                            await widget.repository.addItem(_controller.text);
                             _controller.clear();
                             _updateList();
                           }
                         },
                       ),
                     ),
-                    onSubmitted: (value) {
+                    onSubmitted: (value) async {
                       if (value.isNotEmpty) {
-                        widget.repository.addItem(value);
+                        await widget.repository.addItem(value);
                         _controller.clear();
                         _updateList();
                       }

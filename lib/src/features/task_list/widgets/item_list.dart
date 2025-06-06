@@ -51,8 +51,9 @@ class ItemList extends StatelessWidget {
                           TextButton(
                             child: const Text('Speichern'),
                             onPressed: () {
-                              repository.editItem(index, editController.text);
-                              updateOnChange();
+                              repository.editItem(index, editController.text).whenComplete(() {
+                                updateOnChange();   // Update macht erst nach erfolgreicher Änderung Sinn !!!
+                              },);
                               Navigator.of(context).pop();
                             },
                           ),
@@ -65,8 +66,8 @@ class ItemList extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () {
-                  repository.deleteItem(index);
-                  updateOnChange();
+                  repository.deleteItem(index).then((value) => updateOnChange()); // Hier auch erst nach erfolgreichem Löschen !!!
+                  // updateOnChange();
                 },
               ),
             ],
